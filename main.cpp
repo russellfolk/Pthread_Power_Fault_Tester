@@ -40,6 +40,7 @@ int main(int argc, char **argv)
 	if (fflag == 0)
 	{
 		// need to implement default filename
+		filename = strdup(def_filename);
 	}
 
     file_size = (int) get_file_size(filename);
