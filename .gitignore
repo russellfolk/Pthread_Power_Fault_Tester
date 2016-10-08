@@ -1,5 +1,6 @@
 # do not include the binary file we are working with
 device-file
+run
 
 # ignore macOS files...
 .DS_Store
