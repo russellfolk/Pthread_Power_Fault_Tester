@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -7,7 +8,11 @@
 #define O_BINARY 0
 const int RECORD_SIZE = 8 * 1024;
 
+int first_record;
+int last_record;
+
 size_t get_file_size(const char *);
+void write_records(void);
 
 int main(int argc, char **argv)
 {
@@ -45,14 +50,35 @@ int main(int argc, char **argv)
 
     file_size = (int) get_file_size(filename);
     num_records = file_size / RECORD_SIZE;
+    first_record = 0;
+    last_record = num_records;
 
     std::cout << "File range is 0 to " << file_size << "." << std::endl;
 
     std::cout << "Number of possible records: " << num_records << std::endl;
 
+    write_records();
+
     return 0;
 }
 
+void write_records(void)
+{
+	long thread_id = 0;
+	long record_id = 1;
+	long address;
+	long checksum = 1;
+	std::random_device rd;
+	std::mt19937 generator(rd());
+	std::uniform_int_distribution<> distr(first_record, last_record);
+
+	for (int i = 0; i < 10; i++)
+	{
+		address = distr(generator);
+		std::cout << "Record: " << thread_id << " " << record_id << " " << address << " " << checksum << std::endl;
+		record_id++;
+	}
+}
 
 // https://www.securecoding.cert.org/confluence/display/c/FIO19-C.+Do+not+use+fseek()+and+ftell()+to+compute+the+size+of+a+regular+file
 
