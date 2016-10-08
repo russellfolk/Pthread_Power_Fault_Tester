@@ -23,7 +23,6 @@ int main(int argc, char **argv)
 	// permanent values
 	int num_records, file_size;
 
-
 	while ((c = getopt(argc, argv, "f:")) != -1)
 	{
 		switch (c)
