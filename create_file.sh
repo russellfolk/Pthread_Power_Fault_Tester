@@ -27,10 +27,19 @@ BS="1"${BS_EXT}
 COUNT=128
 LOCATION="./"
 
+while getopts "f:" opt; do
+        case $opt in
+                f)
+                        FILE=${OPTARG}
+                        ;;
+                \?)
+                        echo "Invalid option: -$OPTARG" >&2
+                        ;;
+        esac
+done
+
 if [ $# -eq 0 ]; then
 	FILE="device-file"
-else
-	FILE="${1}"
 fi
 
 # create a file based on the input
