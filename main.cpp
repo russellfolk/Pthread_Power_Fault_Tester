@@ -9,12 +9,41 @@ const int RECORD_SIZE = 8 * 1024;
 
 size_t get_file_size(const char *);
 
-int main()
+int main(int argc, char **argv)
 {
-	int num_records, file_size;
-    std::cout << "Hello, World!" << std::endl;
+	// required for argument parsing
+	int fflag = 0;
+	int c;
+	const char * def_filename = "device-file";
+	char * filename;
+	extern char *optarg;
+	extern int optind;
+	static char usage[] = "usage: %s -f filename\n";
 
-    file_size = (int) get_file_size("device-file");
+	// permanent values
+	int num_records, file_size;
+
+
+	while ((c = getopt(argc, argv, "f:")) != -1)
+	{
+		switch (c)
+		{
+			case 'f':
+				filename = optarg;
+				fflag = 1;
+				break;
+			default:
+				// implement other options, such as help, etc.
+				break;
+		}
+	}
+
+	if (fflag == 0)
+	{
+		// need to implement default filename
+	}
+
+    file_size = (int) get_file_size(filename);
     num_records = file_size / RECORD_SIZE;
 
     std::cout << "File range is 0 to " << file_size << "." << std::endl;
