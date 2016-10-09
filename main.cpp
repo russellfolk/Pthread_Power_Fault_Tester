@@ -85,7 +85,7 @@ void worker_thread_init(int fd)
 	record_data->thread_id = 0;
 	record_data->record_num = 1;
 
-	for (int i = 0; i < 10; i++)
+	while (true)
 		create_record(fd, record_data);
 }
 
