@@ -11,6 +11,7 @@
 #include "thread_info.h"
 #include "thread_local.h"
 #include "record_indexes.h"
+#include "Fletcher64.h"
 
 #define O_BINARY 0
 const int RECORD_SIZE = 8 * 1024;
@@ -25,4 +26,3 @@ size_t write_record(thread_info *, long *, long);
 void * worker_thread_init(void *);
 int intRand(void);
 int open_file(const char * filename);
-uint64_t Fletcher64 (long *, int);
