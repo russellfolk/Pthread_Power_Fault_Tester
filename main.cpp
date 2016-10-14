@@ -147,7 +147,7 @@ size_t get_file_size(int fd)
 		std::cout << "buffer is null" << std::endl;
 	}
 
- 	return file_size;
+	return file_size;
 }
 
 int open_file(const char * filename)
@@ -158,7 +158,7 @@ int open_file(const char * filename)
 	if (fd == -1)
 	{
 		std::cout << "file is null?" << std::endl;
-  		/* Handle error */
+		/* Handle error */
 	}
 
 	return fd;
@@ -166,10 +166,10 @@ int open_file(const char * filename)
 
 int intRand(void)
 {
-    static thread_local std::mt19937* generator;
-    if (!generator) generator = new std::mt19937(clock());
-    std::uniform_int_distribution<int> distribution(first_record, last_record);
-    return distribution(*generator);
+	static thread_local std::mt19937* generator;
+	if (!generator) generator = new std::mt19937(clock());
+	std::uniform_int_distribution<int> distribution(first_record, last_record);
+	return distribution(*generator);
 }
 
 uint64_t Fletcher64 (long * data, int number_to_checksum)
