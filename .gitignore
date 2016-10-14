@@ -1,6 +1,9 @@
 # do not include the binary file we are working with
-device-file
-run
+device-file*
+file-writer
+tmp
+
+bin
 
 # ignore macOS files...
 .DS_Store
