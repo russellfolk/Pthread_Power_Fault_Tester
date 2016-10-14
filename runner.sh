@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+PROGRAM="run"
 WORKERS=2
+TIME=15
 
 while getopts "p:t:w:" opt; do
         case $opt in
@@ -19,4 +21,4 @@ while getopts "p:t:w:" opt; do
         esac
 done
 
-./${PROGRAM} -w ${WORKERS} > tmp & sleep ${TIME}; kill -INT %+
+./${PROGRAM} -w ${WORKERS} > tmp & sleep ${TIME}; kill $!
