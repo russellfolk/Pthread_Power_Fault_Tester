@@ -3,25 +3,27 @@
 SOURCEDIR = ./src/
 OUTPUTDIR = ./bin/
 CXX = g++
-CC = gcc
-CXXFLAGS = -std=c++11 -lpthread -Wall -I $(SOURCEDIR)
-CFLAGS = -Wall -c -I $(SOURCEDIR)
+CXXFLAGS = -std=c++11 -Wall -I $(SOURCEDIR)
+MAINFLAGS = -lpthread
+LINKFLAGS = -c
 
 MKDIR = mkdir -p $(OUTPUTDIR)
-OBJECTC = Fletcher64.o
+OBJCKSM = Fletcher64.o
+OBJFILLIB = file_lib.o
 
-CXXSOURCES = \
-	main.cpp
+OUTWRTR = writer
+OUTCHKR = checker
 
-CSOURCES = \
-	Fletcher64.c
-
-all: writer
+all: writer checker
 
 writer:
 	$(MKDIR)
-	$(CXX) $(SOURCEDIR)$(CSOURCES) $(CFLAGS) -o $(OUTPUTDIR)$(OBJECTC)
-	$(CXX) -o file-writer $(OUTPUTDIR)$(OBJECTC) $(SOURCEDIR)$(CXXSOURCES) $(CXXFLAGS)
+	$(CXX) $(SOURCEDIR)Fletcher64.cpp $(LINKFLAGS) $(CXXFLAGS) -o $(OUTPUTDIR)$(OBJCKSM)
+	$(CXX) $(SOURCEDIR)file_lib.cpp $(LINKFLAGS) $(CXXFLAGS) -o $(OUTPUTDIR)$(OBJFILLIB)
+	$(CXX) -o $(OUTWRTR) $(OUTPUTDIR)$(OBJCKSM) $(OUTPUTDIR)$(OBJFILLIB) $(SOURCEDIR)writer.cpp $(CXXFLAGS) $(MAINFLAGS)
+
+checker:
+	$(CXX) -o $(OUTCHKR) $(OUTPUTDIR)$(OBJCKSM) $(OUTPUTDIR)$(OBJFILLIB) $(SOURCEDIR)checker.cpp $(CXXFLAGS)
 
 .PHONY: clean
 clean:
@@ -29,3 +31,4 @@ clean:
 	$(RM) ./*.gc??
 	$(RM) ./*.o
 	$(RM) -rf ./*.dSYM
+	$(RM) $(OUTWRTR) $(OUTCHKR)
