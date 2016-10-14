@@ -1,0 +1,9 @@
+/**
+  *
+  */
+
+#define IND_THREAD_ID 0
+#define IND_RECORD_NUM 1
+#define IND_RECORD_ADDRESS 2
+#define IND_TIMESTAMP 3
+#define FIRST_RANDOM_RECORD 4
