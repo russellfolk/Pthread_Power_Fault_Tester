@@ -46,14 +46,14 @@ int main(int argc, char **argv)
 
 	fd = open_file(filename);
 
-    file_size = (int) get_file_size(fd);
-    num_records = file_size / RECORD_SIZE;
-    first_record = 0;
-    last_record = num_records;
+	file_size = (int) get_file_size(fd);
+	num_records = file_size / RECORD_SIZE;
+	first_record = 0;
+	last_record = num_records;
 
-    std::cout << "File range is 0 to " << file_size << "." << std::endl;
+	std::cout << "File range is 0 to " << file_size << "." << std::endl;
 
-    std::cout << "Number of possible records: " << num_records << std::endl;
+	std::cout << "Number of possible records: " << num_records << std::endl;
 
 	pthread_mutex_t f_lock;// = PTHREAD_MUTEX_INITIALIZER;
 	std::cout << "mutex?";
