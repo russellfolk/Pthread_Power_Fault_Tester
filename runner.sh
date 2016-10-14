@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 
-while getopts "p:t:" opt; do
+WORKERS=2
+
+while getopts "p:t:w:" opt; do
         case $opt in
                 p)
                         PROGRAM=${OPTARG}
                         ;;
                 t)
-						TIME=${OPTARG}
-						;;
+			TIME=${OPTARG}
+			;;
+                w)
+                        WORKERS=${OPTARG}
+                        ;;
                 \?)
                         echo "Invalid option: -$OPTARG" >&2
                         ;;
         esac
 done
 
-./${PROGRAM} > tmp & sleep ${TIME}; kill -INT %+
+./${PROGRAM} -w ${WORKERS} > tmp & sleep ${TIME}; kill -INT %+
