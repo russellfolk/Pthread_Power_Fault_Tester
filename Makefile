@@ -1,34 +1,44 @@
 # make file...
 #
-SOURCEDIR = ./src/
-OUTPUTDIR = ./bin/
+SRCDIR = ./src/
+OUTDIR = ./bin/
+OBJDIR = ./obj/
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -I $(SOURCEDIR)
-MAINFLAGS = -lpthread
+CXXFLAGS = -std=c++11 -Wall -I $(SRCDIR)
+THREADFLAGS = -lpthread
 LINKFLAGS = -c
 
-MKDIR = mkdir -p $(OUTPUTDIR)
-OBJCKSM = Fletcher64.o
-OBJFILLIB = file_lib.o
-
-OUTWRTR = writer
-OUTCHKR = checker
+MKDIR = mkdir -p
 
 all: writer checker
+	$(RM) -r $(OBJDIR)
 
-writer:
-	$(MKDIR)
-	$(CXX) $(SOURCEDIR)Fletcher64.cpp $(LINKFLAGS) $(CXXFLAGS) -o $(OUTPUTDIR)$(OBJCKSM)
-	$(CXX) $(SOURCEDIR)file_lib.cpp $(LINKFLAGS) $(CXXFLAGS) -o $(OUTPUTDIR)$(OBJFILLIB)
-	$(CXX) -o $(OUTWRTR) $(OUTPUTDIR)$(OBJCKSM) $(OUTPUTDIR)$(OBJFILLIB) $(SOURCEDIR)writer.cpp $(CXXFLAGS) $(MAINFLAGS)
+writer: $(OBJDIR)writer.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o
+	$(MKDIR) $(OUTDIR)
+	$(CXX) $(OBJDIR)writer.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o -o $(OUTDIR)writer $(CXXFLAGS) $(THREADFLAGS)
 
-checker:
-	$(CXX) -o $(OUTCHKR) $(OUTPUTDIR)$(OBJCKSM) $(OUTPUTDIR)$(OBJFILLIB) $(SOURCEDIR)checker.cpp $(CXXFLAGS)
+checker: $(OBJDIR)checker.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o
+	$(MKDIR) $(OUTDIR)
+	$(CXX) $(OBJDIR)checker.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o -o $(OUTDIR)checker $(CXXFLAGS)
+
+$(OBJDIR)writer.o: $(SRCDIR)writer.cpp $(SRCDIR)writer.h $(SRCDIR)thread_info.h $(SRCDIR)thread_local.h $(SRCDIR)record_indexes.h
+	$(MKDIR) $(OBJDIR)
+	$(CXX) $(SRCDIR)writer.cpp -o $(OBJDIR)writer.o $(CXXFLAGS) $(LINKFLAGS)
+
+$(OBJDIR)checker.o: $(SRCDIR)checker.cpp $(SRCDIR)checker.h $(SRCDIR)checker_thread_statistics.h $(SRCDIR)record_indexes.h
+	$(MKDIR) $(OBJDIR)
+	$(CXX) $(SRCDIR)checker.cpp -o $(OBJDIR)checker.o $(CXXFLAGS) $(LINKFLAGS)
+
+$(OBJDIR)Fletcher64.o: $(SRCDIR)Fletcher64.cpp $(SRCDIR)Fletcher64.h
+	$(MKDIR) $(OBJDIR)
+	$(CXX) $(SRCDIR)Fletcher64.cpp $(LINKFLAGS) $(CXXFLAGS) -o $(OBJDIR)Fletcher64.o
+
+$(OBJDIR)file_lib.o: $(SRCDIR)file_lib.cpp $(SRCDIR)file_lib.h
+	$(MKDIR) $(OBJDIR)
+	$(CXX) $(SRCDIR)file_lib.cpp $(LINKFLAGS) $(CXXFLAGS) -o $(OBJDIR)file_lib.o
 
 .PHONY: clean
 clean:
-	$(RM) -rf $(OUTPUTDIR)
+	$(RM) -r $(OUTDIR)
 	$(RM) ./*.gc??
-	$(RM) ./*.o
-	$(RM) -rf ./*.dSYM
-	$(RM) $(OUTWRTR) $(OUTCHKR)
+	$(RM) -r ./*.dSYM
