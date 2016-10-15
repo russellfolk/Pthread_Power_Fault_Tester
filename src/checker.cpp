@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 	int num_records = file_size / RECORD_SIZE;
 
 	check_file(fd, num_records);
+	print_summary();
 
 	close(fd);
 
@@ -47,6 +48,7 @@ void check_file(int fd, int num_records)
 	{
 		long * record = get_record(fd, r_a);
 		print_record(record);
+		parse_record(record);
 	}
 }
 
@@ -67,9 +69,52 @@ long print_record(long * record)
 	long timestamp = record[IND_TIMESTAMP];
 	long checksum = record[((RECORD_SIZE/sizeof(long)) - 1)];
 
-	if (checksum != 0)
+	if (record_num != 0)
 	{
 		std::cout << thread_id << "\t" << record_num << "\t" << address << "\t" << timestamp << "\t" << checksum << std::endl;
 	}
 	return checksum;
+}
+
+void parse_record(long * record)
+{
+	long thread_id = record[IND_THREAD_ID];
+	// record does not exists
+	if (stats.find(thread_id) == stats.end())
+	{
+		thread_statistics these_stats = {
+			0, // no records added yet
+			true, // no true last record
+		};
+		stats.insert(std::make_pair(thread_id, these_stats));
+		total_threads++;
+	}
+
+	bool valid_record = checksum_record(record);
+
+	stats[thread_id].num_records++;
+	if (!valid_record)
+		stats[thread_id].last_success = valid_record;
+}
+
+bool checksum_record(long * record)
+{
+	long checksum = Fletcher64(record, (RECORD_SIZE/sizeof(long)) - 1);
+	return checksum == record[((RECORD_SIZE/sizeof(long)) - 1)];
+}
+
+void print_summary(void)
+{
+	std::cout << "\nStatistics Summary -- " << total_threads << " total threads\n" << std::endl;
+	std::cout << "Thread ID" << "\t" << "Number of Records" << "\t" << "Last record intact" << std::endl;
+	for (stats_it = stats.begin(); stats_it != stats.end(); stats_it++)
+	{
+		long thread_id = stats_it->first;
+		thread_statistics these_stats = stats_it->second;
+		std::cout << std::setw(9) << thread_id << "\t" << std::setw(17) << these_stats.num_records << "\t";
+		if (these_stats.last_success)
+			std::cout << std::setw(18) << "Yes" << std::endl;
+		else
+			std::cout << std::setw(18) << "No" << std::endl;
+	}
 }
