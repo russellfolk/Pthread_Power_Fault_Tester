@@ -17,6 +17,7 @@ long print_record(long *);
 void parse_record(long *);
 bool checksum_record(long *);
 void print_summary(void);
+bool record_blank(long *);
 
 std::map<long, thread_statistics> stats;
 std::map<long, thread_statistics>::iterator stats_it;

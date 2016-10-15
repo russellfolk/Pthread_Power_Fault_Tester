@@ -48,7 +48,6 @@ void check_file(int fd, int num_records)
 	{
 		long * record = get_record(fd, r_a);
 		print_record(record);
-		parse_record(record);
 	}
 }
 
@@ -69,9 +68,10 @@ long print_record(long * record)
 	long timestamp = record[IND_TIMESTAMP];
 	long checksum = record[((RECORD_SIZE/sizeof(long)) - 1)];
 
-	if (record_num != 0)
+	if (!record_blank(record))
 	{
 		std::cout << thread_id << "\t" << record_num << "\t" << address << "\t" << timestamp << "\t" << checksum << std::endl;
+		parse_record(record);
 	}
 	return checksum;
 }
@@ -117,4 +117,13 @@ void print_summary(void)
 		else
 			std::cout << std::setw(18) << "No" << std::endl;
 	}
+}
+
+bool record_blank(long * record)
+{
+	bool blank = true;
+	for (int i = 0; i < (RECORD_SIZE/sizeof(long)) - 1; i++)
+		if (record[i] != 0)
+			blank = false;
+	return blank;
 }
