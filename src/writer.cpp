@@ -75,6 +75,9 @@ int main(int argc, char **argv)
 		}
 	}
 
+	for (int t = 0; t < num_threads; t++)
+		pthread_join(threads[t], NULL);
+
 	pthread_mutex_destroy(&f_lock);
 	pthread_exit(NULL);
 	if (dflag)
