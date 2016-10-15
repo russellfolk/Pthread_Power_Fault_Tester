@@ -4,6 +4,8 @@ writer
 checker
 tmp
 
+*.dSYM
+
 bin
 
 # ignore macOS files...
