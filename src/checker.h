@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <map>
 #include <iomanip>
+#include <cstring>
 
 #include "record_indexes.h"
 #include "file_lib.h"
