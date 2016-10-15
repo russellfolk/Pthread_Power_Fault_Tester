@@ -21,4 +21,4 @@ while getopts "p:t:w:" opt; do
         esac
 done
 
-./${PROGRAM} -w ${WORKERS} > tmp & sleep ${TIME}; kill $!
+./${PROGRAM} -w ${WORKERS} > tmp & sleep ${TIME}; kill -s 9 $!
