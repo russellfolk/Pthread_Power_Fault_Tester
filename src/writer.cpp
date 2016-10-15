@@ -12,13 +12,12 @@ int main(int argc, char **argv)
 	//static char usage[] = "usage: %s -f filename\n";
 	const int def_num_threads = 2;
 	int num_threads;
-	char * num_thr;
 
 	// permanent values
 	int num_records;
 	int fd;
 
-	while ((c = getopt(argc, argv, "w:f:")) != -1)
+	while ((c = getopt(argc, argv, "w:f:d")) != -1)
 	{
 		switch (c)
 		{
@@ -27,7 +26,10 @@ int main(int argc, char **argv)
 				fflag = 1;
 				break;
 			case 'w':
-				num_threads = atoi(optarg);//std::strtol(optarg, &num_thr, 10);
+				num_threads = atoi(optarg);
+				break;
+			case 'd':
+				dflag = true;
 				break;
 			default:
 				// implement other options, such as help, etc.
@@ -55,21 +57,16 @@ int main(int argc, char **argv)
 
 	std::cout << "Number of possible records: " << num_records << std::endl;
 
-	pthread_mutex_t f_lock;// = PTHREAD_MUTEX_INITIALIZER;
-	std::cout << "mutex?";
 	pthread_mutex_init(&f_lock, NULL);
-	std::cout << "init?";
 
 	int rc;
 	pthread_t threads[num_threads];
 	thread_info thread_data[num_threads];
 	for (int t = 0; t < num_threads; t++)
 	{
-		std::cout << "Starting thread " << t;
 		thread_data[t].thread_id = t;
 		thread_data[t].record_num = 1;
 		thread_data[t].fd = fd;
-		thread_data[t].file_lock = &f_lock;
 		rc = pthread_create(&threads[t], NULL, worker_thread_init, (void *) &thread_data[t]);
 		if (rc)
 		{
@@ -78,9 +75,13 @@ int main(int argc, char **argv)
 		}
 	}
 
-	close(fd);
 	pthread_mutex_destroy(&f_lock);
 	pthread_exit(NULL);
+	if (dflag)
+		std::cout << "before close(fd)" << std::endl;
+	close(fd);
+	if (dflag)
+		std::cout << "after close(fd)" << std::endl;
 	return 0;
 }
 
@@ -88,9 +89,12 @@ void * worker_thread_init(void * thread_arg)
 {
 	thread_info * thread_data;
 	thread_data = (thread_info *) thread_arg;
-	//std::cout << "Thread " << thread_id << " rec " << record_num << " fd " << fd << std::endl;
-	while (true)
-		create_record(thread_data);
+	if (dflag)
+		for (int i = 0; i < 10; i++)
+			create_record(thread_data);
+	else
+		while (true)
+			create_record(thread_data);
 	pthread_exit(NULL);
 }
 
@@ -117,9 +121,11 @@ void create_record(thread_info * record_data)
 	checksum = Fletcher64(record, record_size - 1);
 	record[record_size - 1] = Fletcher64(record, record_size - 1);
 
-	//std::cout << "Record: " << record[IND_THREAD_ID] << " " << record[IND_RECORD_NUM] << " " << record[2] << " " << checksum << " " << record[record_size-1] << std::endl;
-	size_t msg = write_record(record_data, record, (record_size * sizeof(record)));
-	//std::cout << "msg " << msg << std::endl;
+	if (dflag)
+		std::cout << "Record: " << record[IND_THREAD_ID] << " " << record[IND_RECORD_NUM] << " " << record[IND_RECORD_ADDRESS] << " " << record[IND_TIMESTAMP] << " " << checksum << std::endl;
+	size_t msg = write_record(record_data, record, size);
+	if (dflag)
+		std::cout << "msg " << msg << std::endl;
 	record_data->record_num += 1;
 	free(record);
 }
@@ -128,12 +134,13 @@ size_t write_record(thread_info * record_data, long * record, long size)
 {
 	size_t nbyte = size;
 	off_t offset = record[IND_RECORD_ADDRESS] * RECORD_SIZE;
+	int fd = record_data->fd;
 
-	//std::cout << "fd " << fd << " nbyte " << nbyte << " offset " << offset << std::endl;
-	//std::cout << (offset < file_size) << " " << (offset + nbyte < file_size) << std::endl;
-	pthread_mutex_lock(record_data->file_lock);
-	size_t msg = pwrite(record_data->fd, record, nbyte, offset);
-	pthread_mutex_unlock(record_data->file_lock);
+	if (dflag)
+		std::cout << "fd " << fd << " nbyte " << nbyte << " offset " << offset << std::endl;
+	//pthread_mutex_lock(&f_lock);
+	size_t msg = pwrite(fd, record, nbyte, offset);
+	//pthread_mutex_unlock(&f_lock);
 	return msg;
 }
 
