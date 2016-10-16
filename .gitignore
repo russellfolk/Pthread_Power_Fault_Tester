@@ -6,7 +6,9 @@ tmp
 
 *.dSYM
 
+# executable directories
 bin
+obj
 
 # ignore macOS files...
 .DS_Store
