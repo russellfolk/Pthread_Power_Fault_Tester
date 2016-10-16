@@ -1,43 +1,34 @@
 # make file...
 #
-SRCDIR = src/
-OUTDIR = bin/
-OBJDIR = obj/
-CXX = g++
-CXXFLAGS = -c -std=c++11 -Wall -I $(SRCDIR)
-LDFLAGS = -lpthread
+SRCDIR       = $(wildcard src/*.cpp)
+OUTDIR       = bin/
+OBJDIR       = obj/
+OBJECTS      = $(SRCDIR:.cpp=.o)
+DEPENDENCIES = $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o
+CXX          = g++
+CXXFLAGS     = -c -std=c++11 -Wall 
+LDFLAGS      = -lpthread
+MKDIR        = mkdir -p
 
-MKDIR = mkdir -p
+all: paths writer checker
+	$(RM) -r $(OBJDIR)
 
-all: writer checker
+.PHONY: paths
+paths:
+	$(MKDIR) $(OBJDIR)
+	$(MKDIR) $(OUTDIR)
 
-writer: $(OBJDIR)writer.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o
-	@$(MKDIR) $(OUTDIR)
-	$(CXX) $(OBJDIR)writer.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o -o $(OUTDIR)writer $(LDFLAGS)
+writer: $(OBJECTS)
+	$(CXX) $(DEPENDENCIES) $(OBJDIR)writer.o -o $(OUTDIR)$@ $(LDFLAGS)
 
-checker: $(OBJDIR)checker.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o
-	@$(MKDIR) $(OUTDIR)
-	$(CXX) $(OBJDIR)checker.o $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o -o $(OUTDIR)checker
+checker:$(OBJECTS)
+	$(CXX) $(DEPENDENCIES) $(OBJDIR)checker.o -o $(OUTDIR)$@
 
-$(OBJDIR)writer.o: $(SRCDIR)writer.cpp $(SRCDIR)writer.h $(SRCDIR)thread_info.h $(SRCDIR)thread_local.h $(SRCDIR)record_indexes.h
-	@$(MKDIR) $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(SRCDIR)writer.cpp -o $(OBJDIR)writer.o
-
-$(OBJDIR)checker.o: $(SRCDIR)checker.cpp $(SRCDIR)checker.h $(SRCDIR)checker_thread_statistics.h $(SRCDIR)record_indexes.h
-	@$(MKDIR) $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(SRCDIR)checker.cpp -o $(OBJDIR)checker.o
-
-$(OBJDIR)Fletcher64.o: $(SRCDIR)Fletcher64.cpp $(SRCDIR)Fletcher64.h
-	@$(MKDIR) $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(SRCDIR)Fletcher64.cpp -o $(OBJDIR)Fletcher64.o
-
-$(OBJDIR)file_lib.o: $(SRCDIR)file_lib.cpp $(SRCDIR)file_lib.h
-	@$(MKDIR) $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(SRCDIR)file_lib.cpp -o $(OBJDIR)file_lib.o
+.cpp.o: 
+	$(CXX) $(CXXFLAGS) $< -o $(OBJDIR)$(@F)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR)
-	rm -rf $(OUTDIR)
-	@$(RM) ./*.gc??
-	@rm -rf ./*.dSYM
+	$(RM) -r $(OUTDIR)
+	$(RM) ./*.gc??
+	$(RM) -r ./*.dSYM
