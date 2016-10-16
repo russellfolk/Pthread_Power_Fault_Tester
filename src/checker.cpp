@@ -9,6 +9,7 @@ int main(int argc, char **argv)
 	char * filename;
 	extern char *optarg;
 	extern int optind;
+	bool dflag = false;
 
 	while ((c = getopt(argc, argv, "f:d")) != -1)
 	{
