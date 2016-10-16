@@ -28,6 +28,7 @@ checker:$(OBJECTS)
 
 .PHONY: clean
 clean:
-	$(RM) -r $(OUTDIR)
-	$(RM) ./*.gc??
-	$(RM) -r ./*.dSYM
+	rm -rf $(OUTDIR)
+	rm -rf $(OBJDIR)
+	@$(RM) ./*.gc??
+	@rm -rf ./*.dSYM
