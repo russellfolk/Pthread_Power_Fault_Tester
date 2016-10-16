@@ -6,12 +6,11 @@ OBJDIR       = obj/
 OBJECTS      = $(SRCDIR:.cpp=.o)
 DEPENDENCIES = $(OBJDIR)Fletcher64.o $(OBJDIR)file_lib.o
 CXX          = g++
-CXXFLAGS     = -c -std=c++11 -Wall 
+CXXFLAGS     = -c -std=c++11 -Wall
 LDFLAGS      = -lpthread
 MKDIR        = mkdir -p
 
 all: paths writer checker
-	$(RM) -r $(OBJDIR)
 
 .PHONY: paths
 paths:
@@ -24,7 +23,7 @@ writer: $(OBJECTS)
 checker:$(OBJECTS)
 	$(CXX) $(DEPENDENCIES) $(OBJDIR)checker.o -o $(OUTDIR)$@
 
-.cpp.o: 
+.cpp.o:
 	$(CXX) $(CXXFLAGS) $< -o $(OBJDIR)$(@F)
 
 .PHONY: clean
