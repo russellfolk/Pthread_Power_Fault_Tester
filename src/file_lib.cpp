@@ -28,7 +28,7 @@ int open_file(const char * filename)
 {
 	int fd;
 
-	fd = open(filename, O_RDWR | O_DSYNC);
+	fd = open(filename, FILE_FLAGS);
 	if (fd == -1)
 	{
 		std::cout << "file is null?" << std::endl;
