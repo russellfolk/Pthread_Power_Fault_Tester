@@ -116,13 +116,14 @@ void create_record(thread_info * record_data)
 	record[IND_RECORD_NUM] = record_data->record_num;
 	record[IND_RECORD_ADDRESS] = address;
 	record[IND_TIMESTAMP] = (long) nanos;
-	for (int i = FIRST_RANDOM_RECORD; i < record_size - 1; i++)
+	for (int i = IND_FIRST_RANDOM_RECORD; i < record_size - 1; i++)
 	{
 		record[i] = record[i-1] + record[0] * record[1] * i + record[2];
 	}
 
-	checksum = Fletcher64(record, record_size - 1);
-	record[record_size - 1] = Fletcher64(record, record_size - 1);
+	checksum = Fletcher64(record);
+	record[IND_TAIL_CHECKSUM] = checksum;
+	record[IND_HEAD_CHECKSUM] = checksum;
 
 	if (dflag)
 		std::cout << "Record: " << record[IND_THREAD_ID] << " " << record[IND_RECORD_NUM] << " " << record[IND_RECORD_ADDRESS] << " " << record[IND_TIMESTAMP] << " " << checksum << std::endl;
