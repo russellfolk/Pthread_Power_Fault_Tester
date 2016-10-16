@@ -21,4 +21,6 @@ bool record_blank(long *);
 
 std::map<long, thread_statistics> stats;
 std::map<long, thread_statistics>::iterator stats_it;
+
 int total_threads = 0;
+bool dflag = false;

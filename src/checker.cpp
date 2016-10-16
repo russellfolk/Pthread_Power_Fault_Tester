@@ -10,13 +10,16 @@ int main(int argc, char **argv)
 	extern char *optarg;
 	extern int optind;
 
-	while ((c = getopt(argc, argv, "f:")) != -1)
+	while ((c = getopt(argc, argv, "f:d")) != -1)
 	{
 		switch (c)
 		{
 			case 'f':
 				filename = optarg;
 				fflag = 1;
+				break;
+			case 'd':
+				dflag = true;
 				break;
 			default:
 				// implement other options, such as help, etc.
@@ -94,13 +97,27 @@ void parse_record(long * record)
 
 	stats[thread_id].num_records++;
 	if (!valid_record)
+	{
+		if (dflag)
+		{
+			std::cout
+				  << "Bad Record:" << std::endl
+		          << "Head checksum: " << record[IND_HEAD_CHECKSUM] << std::endl
+		          << "Tail checksum: " << record[IND_TAIL_CHECKSUM] << std::endl
+		          << "Thread ID: " << record[IND_THREAD_ID] << "\t"
+		          << "Record ID: " << record[IND_RECORD_NUM] << std::endl
+		          << "Address: " << record[IND_RECORD_ADDRESS] << std::endl
+		          << "Timestamp: " << record[IND_TIMESTAMP] << std::endl;
+		}
 		stats[thread_id].last_success = valid_record;
+	}
 }
 
 bool checksum_record(long * record)
 {
-	long checksum = Fletcher64(record, (RECORD_SIZE/sizeof(long)) - 1);
-	return checksum == record[((RECORD_SIZE/sizeof(long)) - 1)];
+	long checksum = Fletcher64(record);
+	return (checksum == record[IND_HEAD_CHECKSUM]) &&
+	       (checksum == record[IND_TAIL_CHECKSUM]);
 }
 
 void print_summary(void)
