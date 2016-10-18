@@ -88,6 +88,9 @@ void parse_record(long * record)
 	{
 		thread_statistics these_stats = {
 			0, // no records added yet
+			0, // no good records
+			0, // no bad records
+			0, // no last timestamp
 			true, // no true last record
 		};
 		stats.insert(std::make_pair(thread_id, these_stats));
@@ -97,6 +100,11 @@ void parse_record(long * record)
 	bool valid_record = checksum_record(record);
 
 	stats[thread_id].num_records++;
+	if (record[IND_TIMESTAMP] > stats[thread_id].record_write_time)
+	{
+		stats[thread_id].last_success = valid_record;
+		stats[thread_id].record_write_time = record[IND_TIMESTAMP];
+	}
 	if (!valid_record)
 	{
 		if (dflag)
@@ -110,7 +118,11 @@ void parse_record(long * record)
 		          << "Address: " << record[IND_RECORD_ADDRESS] << std::endl
 		          << "Timestamp: " << record[IND_TIMESTAMP] << std::endl;
 		}
-		stats[thread_id].last_success = valid_record;
+		stats[thread_id].num_partial++;
+	}
+	else
+	{
+		stats[thread_id].num_successful++;
 	}
 }
 
@@ -123,13 +135,19 @@ bool checksum_record(long * record)
 
 void print_summary(void)
 {
-	std::cout << "\nStatistics Summary -- " << total_threads << " total threads\n" << std::endl;
-	std::cout << "Thread ID" << "\t" << "Number of Records" << "\t" << "Last record intact" << std::endl;
+	std::cout << "\nStatistics Summary -- " << total_threads
+	          << " total threads\n" << std::endl;
+	std::cout << "Thread ID" << "\t" << "Number of Records" << "\t"
+	          << "Successful Writes" << "\t" << "Partial Writes" << "\t"
+	          << "Last record intact" << std::endl;
 	for (stats_it = stats.begin(); stats_it != stats.end(); stats_it++)
 	{
 		long thread_id = stats_it->first;
 		thread_statistics these_stats = stats_it->second;
-		std::cout << std::setw(9) << thread_id << "\t" << std::setw(17) << these_stats.num_records << "\t";
+		std::cout << std::setw(9) << thread_id << "\t" << std::setw(17)
+		          << these_stats.num_records << "\t"
+		          << std::setw(17) << these_stats.num_successful << "\t"
+		          << std::setw(14) << these_stats.num_partial;
 		if (these_stats.last_success)
 			std::cout << std::setw(18) << "Yes" << std::endl;
 		else
