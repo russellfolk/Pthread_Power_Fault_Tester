@@ -136,14 +136,24 @@ void create_record(thread_info * record_data)
 
 size_t write_record(thread_info * record_data, long * record, long size)
 {
-	size_t nbyte = size;
+	size_t nbyte = size / NUM_PIECES;
 	off_t offset = record[IND_RECORD_ADDRESS] * RECORD_SIZE;
 	int fd = record_data->fd;
 
 	if (dflag)
 		std::cout << "fd " << fd << " nbyte " << nbyte << " offset " << offset << std::endl;
 	//pthread_mutex_lock(&f_lock);
-	size_t msg = pwrite(fd, record, nbyte, offset);
+	size_t msg = 0;
+	for (int piece = 0; piece < NUM_PIECES; piece++)
+	{
+		if (dflag)
+			if (piece < IND_FIRST_RANDOM_RECORD && piece != IND_TAIL_CHECKSUM)
+				std::cout << record[piece] << " " << "offset: " << offset << " ";
+		msg += pwrite(fd, &record[piece], nbyte, offset);
+		offset += (off_t) nbyte;
+	}
+	if (dflag)
+		std::cout << std::endl << "wrote: " << msg << std::endl;
 	//pthread_mutex_unlock(&f_lock);
 	return msg;
 }

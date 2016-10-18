@@ -14,6 +14,7 @@
 #include "Fletcher64.h"
 #include "file_lib.h"
 
+const int NUM_PIECES = 1024;
 const int RECORD_SIZE = 8 * 1024;
 
 pthread_mutex_t f_lock;
