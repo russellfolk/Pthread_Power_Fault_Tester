@@ -10,14 +10,20 @@
 #include "checker_thread_statistics.h"
 
 const int RECORD_SIZE = 8 * 1024;
+const int NUM_PIECES = 1024;
 
 void check_file(int, int);
 long * get_record(int, long);
-long print_record(long *);
-void parse_record(long *);
+void parse_record(long *, long);
+double percent_written(long *, long);
+bool thread_id_valid(long *);
+bool record_num_valid(long *);
+bool address_valid(long *, long);
+bool timestamp_valid(long *);
 bool checksum_record(long *);
+bool is_record_blank(long *);
+void print_record(long *);
 void print_summary(void);
-bool record_blank(long *);
 
 std::map<long, thread_statistics> stats;
 std::map<long, thread_statistics>::iterator stats_it;
