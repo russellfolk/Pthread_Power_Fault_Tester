@@ -9,7 +9,7 @@
 #include <chrono>
 
 #include "thread_info.h"
-#include "thread_local.h"
+#include "thread_local_random.h"
 #include "record_indexes.h"
 #include "Fletcher64.h"
 #include "file_lib.h"

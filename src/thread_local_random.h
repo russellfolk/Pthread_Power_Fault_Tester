@@ -1,3 +1,12 @@
+/**
+  * Thread local is required in order to have a thread safe random number
+  * generator. This is used in order to select which record I will write at a
+  * given time. The reason this is required is so that each worker thread does
+  * not select the same pattern of random numbers. E.g. thread 1 chooses 2, 355,
+  * 7204, ...; thread 2 chooses 2, 355, 7204, ...; thread 3 chooses 2, 355,
+  * 7204, ...; ...
+  */
+
 #ifndef thread_local
 # if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
 #  define thread_local _Thread_local
@@ -18,5 +27,4 @@
 #endif
 
 #include <random>
-#include <time.h>
 #include <thread>
