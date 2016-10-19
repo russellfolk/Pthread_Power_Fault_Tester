@@ -17,8 +17,6 @@
 const int NUM_PIECES = 1024;
 const int RECORD_SIZE = 8 * 1024;
 
-pthread_mutex_t f_lock;
-
 int first_record;
 int last_record;
 int file_size;

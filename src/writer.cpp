@@ -57,8 +57,6 @@ int main(int argc, char **argv)
 
 	std::cout << "Number of possible records: " << num_records << std::endl;
 
-	pthread_mutex_init(&f_lock, NULL);
-
 	int rc;
 	pthread_t threads[num_threads];
 	thread_info thread_data[num_threads];
@@ -78,13 +76,8 @@ int main(int argc, char **argv)
 	for (int t = 0; t < num_threads; t++)
 		pthread_join(threads[t], NULL);
 
-	pthread_mutex_destroy(&f_lock);
 	pthread_exit(NULL);
-	if (dflag)
-		std::cout << "before close(fd)" << std::endl;
 	close(fd);
-	if (dflag)
-		std::cout << "after close(fd)" << std::endl;
 	return 0;
 }
 
@@ -142,7 +135,7 @@ size_t write_record(thread_info * record_data, long * record, long size)
 
 	if (dflag)
 		std::cout << "fd " << fd << " nbyte " << nbyte << " offset " << offset << std::endl;
-	//pthread_mutex_lock(&f_lock);
+
 	size_t msg = 0;
 	for (int piece = 0; piece < NUM_PIECES; piece++)
 	{
@@ -154,7 +147,7 @@ size_t write_record(thread_info * record_data, long * record, long size)
 	}
 	if (dflag)
 		std::cout << std::endl << "wrote: " << msg << std::endl;
-	//pthread_mutex_unlock(&f_lock);
+
 	return msg;
 }
 
