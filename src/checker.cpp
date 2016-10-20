@@ -118,7 +118,7 @@ void parse_record(long * record, long record_address)
 	}
 	else
 	{
-		stats[thread_id].num_successful++;
+		stats[thread_id].num_complete++;
 		stats[thread_id].percentage_written += 1.0;
 		if (!address_valid(record, record_address))
 			stats[thread_id].num_missed_write++;
@@ -225,7 +225,7 @@ void print_summary(void)
 		percentage_written /= these_stats.num_records;
 		std::cout << std::setw(9) << thread_id << "\t" << std::setw(17)
 		          << these_stats.num_records << "\t"
-		          << std::setw(17) << these_stats.num_successful << "\t"
+		          << std::setw(17) << these_stats.num_complete << "\t"
 		          << std::setw(14) << these_stats.num_partial << "\t"
 		          << std::setw(9) << percentage_written << "\t"
 		          << std::setw(13) << these_stats.num_missed_write << "\t";
