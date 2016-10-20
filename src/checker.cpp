@@ -121,7 +121,7 @@ void parse_record(long * record, long record_address)
 		stats[thread_id].num_successful++;
 		stats[thread_id].percentage_written += 1.0;
 		if (!address_valid(record, record_address))
-			stats[thread_id].num_missed_write;
+			stats[thread_id].num_missed_write++;
 	}
 }
 
