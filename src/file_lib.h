@@ -28,6 +28,9 @@
 	#define FILE_FLAGS (O_RDWR | O_DIRECT | O_SYNC)
 #endif
 
+// external debugging flag
+extern bool dflag;
+
 /**
   * Open file returns a file descriptor
   *

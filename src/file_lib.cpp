@@ -23,7 +23,7 @@ size_t get_file_size(int fd)
 	if ((fstat(fd, &stbuf) != 0) || (!S_ISREG(stbuf.st_mode)))
 	{
 		if (dflag)
-			std::cout << "Cannot interpret information about the file."
+			std::cout << "Cannot interpret information about the file.";
 	}
 
 	file_size = stbuf.st_size;
