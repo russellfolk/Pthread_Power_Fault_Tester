@@ -9,7 +9,7 @@ WORKERS=16
 TIME=60
 DEBUG=false
 
-USAGE="To run: ./run_experiments -l <file locations> -f <device file>
+USAGE="To run: ./run_experiments.sh -l <file locations> -f <device file>
 -r <writer> -c <checker> -t <seconds to write> -w <# threads to use>\n\
 If no arguments are supplied: file location = ./bin/, device file = device-file,
  writer = writer, checker = checker, seconds = 60, threads = 16"
