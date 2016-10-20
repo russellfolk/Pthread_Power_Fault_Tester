@@ -35,9 +35,10 @@ COUNT=128         # number of blocks to copy
 
 USAGE="To run: ./create_device -f <device filename> -l <save location>\n\
 If no arguments are supplied, filename = device-file, location = bin/"
+DEBUG=false
 
 # collect the input,
-while getopts "f:l:?" opt; do
+while getopts "f:l:?d" opt; do
         case $opt in
                 f)
                         FILE=${OPTARG}
@@ -49,6 +50,9 @@ while getopts "f:l:?" opt; do
                         echo -e ${USAGE}
                         exit
                         ;;
+                d)
+                        DEBUG=true
+                        ;;
         esac
 done
 
@@ -59,4 +63,8 @@ if [ $# -eq 0 ]; then
 fi
 
 # create a file based on the input / defaults
-dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT}
+if [ ${DEBUG} = false ]; then
+        dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT} >> /dev/null
+else
+        dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT}
+fi
