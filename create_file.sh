@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
+<<'DOCUMENTATION'
+This program will create a device that is used to store records and simulate a
+power loss using the associated writer and checker programs (located in bin/).
+DOCUMENTATION
 
+# This will allow the correct extension to be set based on operating system in
+# use for this program. Thus far, only macOS 12 and Linux have been tested.
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
         # Linux
         BS_EXT="M"
@@ -10,7 +16,7 @@ elif [[ "$OSTYPE" == "cygwin" ]]; then
         # POSIX compatibility layer and Linux environment emulation for Windows
         BS_EXT="M" # needs testing...
 elif [[ "$OSTYPE" == "msys" ]]; then
-        # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+        # Lightweight shell and GNU utilities compiled for Windows (MinGW)
         BS_EXT="M" # needs testing...
 elif [[ "$OSTYPE" == "win32" ]]; then
         # I'm not sure this can happen.
@@ -23,24 +29,34 @@ else
         BS_EXT="M" # needs testing...
 fi
 
-BS="1"${BS_EXT}
-COUNT=128
-LOCATION="./"
+# default arguments provided by assignment
+BS="1"${BS_EXT}   # input/output block size in bytes
+COUNT=128         # number of blocks to copy
 
-while getopts "f:" opt; do
+USAGE="To run: ./create_device -f <device filename> -l <save location>\n\
+If no arguments are supplied, filename = device-file, location = bin/"
+
+# collect the input,
+while getopts "f:l:?" opt; do
         case $opt in
                 f)
                         FILE=${OPTARG}
                         ;;
+                l)
+                        LOCATION=${OPTARG}
+                        ;;
                 \?)
-                        echo "Invalid option: -$OPTARG" >&2
+                        echo -e ${USAGE}
+                        exit
                         ;;
         esac
 done
 
+# if no arguments are supplied, use defaults...
 if [ $# -eq 0 ]; then
-	FILE="device-file"
+	FILE="device-file" # name of file to create
+        LOCATION="./bin/"  # location to store the file
 fi
 
-# create a file based on the input
+# create a file based on the input / defaults
 dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT}
