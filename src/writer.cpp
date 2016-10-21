@@ -53,9 +53,11 @@ int main(int argc, char **argv)
 	first_record = 0;
 	last_record = num_records;
 
-	std::cout << "File range is 0 to " << file_size << "." << std::endl;
-
-	std::cout << "Number of possible records: " << num_records << std::endl;
+	if (dflag)
+	{
+		std::cout << "File range is 0 to " << file_size << "." << std::endl;
+		std::cout << "Number of possible records: " << num_records << std::endl;
+	}
 
 	int rc;
 	pthread_t threads[num_threads];
