@@ -50,10 +50,8 @@ make clean
 # compile the programs
 make
 
-echo -e "DEBUG IS ${DEBUG}"
 # create the device file
 if [ ${DEBUG} = false ]; then
-        echo "no debug"
         ${CREATOR} -f ${FILE} -l ${LOCATION}
 else
         ${CREATOR} -d -f ${FILE} -l ${LOCATION}
@@ -61,17 +59,16 @@ fi
 
 # run the writer for t seconds
 if [ ${DEBUG} = false ]; then
-        echo "no debug"
         ${LOCATION}${WRITER} -w ${WORKERS} -f ${LOCATION}${FILE} &
         sleep ${TIME}
         kill -9 $!
 else
-        ${LOCATION}${WRITER} -d -w ${WORKERS} -f ${LOCATION}${FILE} > "writer_debug.txt"
+        ${LOCATION}${WRITER} -d -w ${WORKERS} -f ${LOCATION}${FILE} \
+        > "writer_debug.txt"
 fi
 
 # run the checker
 if [ ${DEBUG} = false ]; then
-        echo "no debug"
         ${LOCATION}${CHECKER} -f ${LOCATION}${FILE}
 else
         ${LOCATION}${CHECKER} -d -f ${LOCATION}${FILE} > "checker_debug.txt"
