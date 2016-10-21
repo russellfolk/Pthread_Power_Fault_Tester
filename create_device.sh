@@ -64,7 +64,8 @@ fi
 
 # create a file based on the input / defaults
 if [ ${DEBUG} = false ]; then
-        dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT} >> /dev/null
+        dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT} \
+        > /dev/null 2>&1
 else
         dd if=/dev/zero of=${LOCATION}${FILE} bs=${BS} count=${COUNT}
 fi
