@@ -114,7 +114,8 @@ void parse_record(long * record, long record_address)
 			      << "Timestamp: " << record[IND_TIMESTAMP] << std::endl;
 		}
 		stats[thread_id].num_partial++;
-		stats[thread_id].percentage_written = percent_written(record, record_address);
+		stats[thread_id].percentage_written +=
+		                 percent_written(record, record_address);
 	}
 	else
 	{
