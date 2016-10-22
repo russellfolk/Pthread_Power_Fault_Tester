@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <cstring>
 #include <chrono>
+#include <ctime>
 
 // local libraries needed to run the checker
 #include "record_indexes.h"

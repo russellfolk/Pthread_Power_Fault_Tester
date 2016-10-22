@@ -332,8 +332,11 @@ void print_record(long * record)
 void print_summary(void)
 {
 	std::time_t failure_time = estimated_power_loss();
+	char print_time[24];
+	// would normally use std::put_time(std::localtime(&failure_time), "%F %T"), but doesn't work with gcc v4.8
+	std::strftime(print_time, sizeof(print_time), "[ %F %T ]", std::localtime(&failure_time));
 	std::cout << std::endl << "Estimated time of powerloss" << std::endl
-	          << std::put_time(std::localtime(&failure_time), "%F %T") << std::endl;
+	          << print_time << std::endl;
 	std::cout << std::endl << "Statistics Summary -- " << total_threads
 	          << " total threads\n" << std::endl;
 	std::cout << "Thread ID" << "\t" << "Number of Records" << "\t"
@@ -344,7 +347,7 @@ void print_summary(void)
 	{
 		stats_file << "Summary of information about records written to device-file" << std::endl << std::endl;
 		stats_file << "Estimated time of powerloss" << std::endl
-		           << std::put_time(std::localtime(&failure_time), "%F %T") << std::endl;
+		           << print_time << std::endl;
 		stats_file << std::endl << "Statistics Summary -- " << total_threads
 		           << " total threads\n" << std::endl;
 		stats_file << "Thread ID" << "\t" << "Number of Records" << "\t"
