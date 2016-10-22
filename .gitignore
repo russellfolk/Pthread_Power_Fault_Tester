@@ -14,5 +14,9 @@ obj
 checker_debug.txt
 writer_debug.txt
 
+# checker output files
+record-statstics.txt
+records-written.txt
+
 # ignore macOS files...
 .DS_Store
