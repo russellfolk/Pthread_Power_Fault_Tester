@@ -10,5 +10,9 @@ tmp
 bin
 obj
 
+# debug files
+checker_debug.txt
+writer_debug.txt
+
 # ignore macOS files...
 .DS_Store
