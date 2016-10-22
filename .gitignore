@@ -15,7 +15,7 @@ checker_debug.txt
 writer_debug.txt
 
 # checker output files
-record-statstics.txt
+record-statistics.txt
 records-written.txt
 
 # ignore macOS files...
