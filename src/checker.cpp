@@ -52,8 +52,8 @@ int main(int argc, char **argv)
 		exit(0);
 
 	// Need to implement default filename
-	if (fflag)
-		filename = strdup(def_filename);
+	if (!fflag)
+		filename = strdup(def_devicefile);
 
 	// open the file and set the descriptor
 	int fd = open_file(filename);

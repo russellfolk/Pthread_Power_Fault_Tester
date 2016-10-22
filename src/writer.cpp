@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 		exit(0);
 
 	// Need to implement default filename
-	if (fflag)
+	if (!fflag)
 		filename = strdup(def_filename);
 
 	// Need to have a sane number of threads
