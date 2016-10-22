@@ -8,13 +8,15 @@ LOCATION="./bin/"
 WORKERS=16
 TIME=60
 DEBUG=false
+OUTPUT=false
 
 USAGE="To run: ./run_experiments.sh -l <file locations> -f <device file>
--r <writer> -c <checker> -t <seconds to write> -w <# threads to use>\n\
+-r <writer> -c <checker> -t <seconds to write> -w <# threads to use>
+-o (output validation details to file)\n\
 If no arguments are supplied: file location = ./bin/, device file = device-file,
  writer = writer, checker = checker, seconds = 60, threads = 16"
 
-while getopts "l:f:r:c:t:w:?:d" opt; do
+while getopts "l:f:r:c:t:w:do?" opt; do
         case $opt in
                 l)
                         LOCATION="./"${OPTARG}
@@ -34,21 +36,27 @@ while getopts "l:f:r:c:t:w:?:d" opt; do
                 w)
                         WORKERS=${OPTARG}
                         ;;
+                d)
+                        DEBUG=true
+                        ;;
+                o)
+                        OUTPUT=true
+                        ;;
                 \?)
                         echo -e ${USAGE}
                         exit
                         ;;
-                d)
-                        DEBUG=true
-                        ;;
         esac
 done
 
-# clean out old files
-make clean
-
-# compile the programs
-make
+# clean out old files and compile the programs
+if [ ${DEBUG} = false ]; then
+        make clean > /dev/null
+        make > /dev/null
+else
+        make clean
+        make
+fi
 
 # create the device file
 if [ ${DEBUG} = false ]; then
@@ -69,7 +77,11 @@ fi
 
 # run the checker
 if [ ${DEBUG} = false ]; then
-        ${LOCATION}${CHECKER} -f ${LOCATION}${FILE}
+        if [ ${OUTPUT} = false ]; then
+                ${LOCATION}${CHECKER} -f ${LOCATION}${FILE}
+        else
+                ${LOCATION}${CHECKER} -f ${LOCATION}${FILE} -o
+        fi
 else
         ${LOCATION}${CHECKER} -d -f ${LOCATION}${FILE} > "checker_debug.txt"
 fi
