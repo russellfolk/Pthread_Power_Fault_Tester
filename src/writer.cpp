@@ -3,6 +3,9 @@
 /**
  * device-file record writer
  *
+ * This is the main program to create records for the device-file and write them to to file. This is meant to simulate a
+ * hard drive file system writing blocks to a hard drive and model what could happen if a power loss event occurs.
+ *
  * @param  argc the number of flags and arguments provided
  * @param  argv the flags and arguments provided
  * @return      result code for the program running
@@ -43,6 +46,7 @@ int main(int argc, char **argv)
 			case '?':
 				std::cout << usage << std::endl;
 				eflag = true;
+				break;
 			default:
 				// implement other options, such as help, etc.
 				break;
