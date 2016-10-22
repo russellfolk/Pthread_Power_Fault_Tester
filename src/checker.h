@@ -3,6 +3,7 @@
 #include <map>
 #include <iomanip>
 #include <cstring>
+#include <chrono>
 
 #include "record_indexes.h"
 #include "file_lib.h"
@@ -22,6 +23,7 @@ bool address_valid(long *, long);
 bool timestamp_valid(long *);
 bool checksum_record(long *);
 bool is_record_blank(long *);
+std::time_t estimated_power_loss(void);
 void print_record(long *);
 void print_summary(void);
 

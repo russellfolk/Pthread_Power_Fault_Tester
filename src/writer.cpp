@@ -124,8 +124,8 @@ void * worker_thread_init(void * thread_arg)
 void create_record(thread_info * record_data)
 {
 	// record the time this record is started
-	auto since_epoch = std::chrono::high_resolution_clock::now().time_since_epoch();
-	auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
+	auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
+	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch).count();
 
 	// create an array of longs that comprise a complete record
 	long * record = (long *) malloc(RECORD_SIZE);
@@ -140,7 +140,7 @@ void create_record(thread_info * record_data)
 	record[IND_THREAD_ID] = record_data->thread_id;
 	record[IND_RECORD_NUM] = record_data->record_num;
 	record[IND_RECORD_ADDRESS] = address;
-	record[IND_TIMESTAMP] = (long) nanos;
+	record[IND_TIMESTAMP] = (long) millis;
 
 	// generate "random data"
 	for (int i = IND_FIRST_RANDOM_RECORD; i < NUM_PIECES - 1; i++)

@@ -54,7 +54,7 @@ void * worker_thread_init(void *);
   * fields to place the required information. A record includes a checksum, the
   * id of the thread that creates the record, the id of the record (incremented
   * with every record starting with 1), the address the record is to be written
-  * to, the number of nanoseconds since the epoch when the record was created,
+  * to, the number of milliseconds since the epoch when the record was created,
   * and a set of computer generated data that is a set formula that can be later
   * verified to see where a breakdown occurs.
   *

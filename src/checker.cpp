@@ -198,6 +198,22 @@ bool is_record_blank(long * record)
 	return blank;
 }
 
+std::time_t estimated_power_loss(void)
+{
+	long last_creation_time = 0;
+	for (stats_it = stats.begin(); stats_it != stats.end(); stats_it++)
+	{
+		thread_statistics these_stats = stats_it->second;
+		if (these_stats.record_write_time > last_creation_time)
+			last_creation_time = these_stats.record_write_time;
+	}
+	auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
+	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch).count();
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	std::time_t failure_time = std::chrono::system_clock::to_time_t(now - std::chrono::milliseconds(millis - last_creation_time));
+	return failure_time;
+}
+
 void print_record(long * record)
 {
 	long thread_id = record[IND_THREAD_ID];
@@ -212,7 +228,10 @@ void print_record(long * record)
 
 void print_summary(void)
 {
-	std::cout << "\nStatistics Summary -- " << total_threads
+	std::time_t failure_time = estimated_power_loss();
+	std::cout << std::endl << "Estimated time of powerloss" << std::endl
+	          << std::put_time(std::localtime(&failure_time), "%F %T") << std::endl;
+	std::cout << std::endl << "Statistics Summary -- " << total_threads
 	          << " total threads\n" << std::endl;
 	std::cout << "Thread ID" << "\t" << "Number of Records" << "\t"
 	          << "Successful Writes" << "\t" << "Partial Writes" << "\t"
