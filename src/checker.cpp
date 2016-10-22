@@ -3,24 +3,31 @@
 int main(int argc, char **argv)
 {
 	// required for argument parsing
-	int fflag = 0;
+	bool eflag = false; // exit flag, display help was requested
+	bool fflag = false;  // default filename flag
 	int c;
-	const char * def_filename = "bin/device-file";
 	char * filename;
 	extern char *optarg;
 	extern int optind;
+	std::string usage = "To run: ./bin/checker -f <device file> -d (to enable debug)\n"
+	                    "If no arguments are supplied: device file = bin/device-file, debug = off";
 
-	while ((c = getopt(argc, argv, "f:d")) != -1)
+	const char * def_filename = "bin/device-file";
+
+	while ((c = getopt(argc, argv, "f:d?")) != -1)
 	{
 		switch (c)
 		{
 			case 'f':
 				filename = optarg;
-				fflag = 1;
+				fflag = true;
 				break;
 			case 'd':
-				std::cout << "DFLAG SET!!!!!!" << std::endl;
 				dflag = true;
+				break;
+			case '?':
+				std::cout << usage << std::endl;
+				eflag = true;
 				break;
 			default:
 				// implement other options, such as help, etc.
@@ -28,11 +35,13 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (fflag == 0)
-	{
-		// need to implement default filename
+	// Need to exit program if '?' argument is given
+	if (eflag)
+		exit(0);
+
+	// Need to implement default filename
+	if (fflag)
 		filename = strdup(def_filename);
-	}
 
 	int fd = open_file(filename);
 	int file_size = (int) get_file_size(fd);
@@ -121,9 +130,9 @@ void parse_record(long * record, long record_address)
 	{
 		stats[thread_id].num_complete++;
 		stats[thread_id].percentage_written += 1.0;
-		if (!address_valid(record, record_address))
-			stats[thread_id].num_missed_write++;
 	}
+	if (!address_valid(record, record_address))
+		stats[thread_id].num_missed_write++;
 }
 
 double percent_written(long * record, long record_address)
@@ -200,6 +209,7 @@ bool is_record_blank(long * record)
 
 std::time_t estimated_power_loss(void)
 {
+	std::time_t failure_time;
 	long last_creation_time = 0;
 	for (stats_it = stats.begin(); stats_it != stats.end(); stats_it++)
 	{
@@ -207,10 +217,10 @@ std::time_t estimated_power_loss(void)
 		if (these_stats.record_write_time > last_creation_time)
 			last_creation_time = these_stats.record_write_time;
 	}
-	auto since_epoch = std::chrono::system_clock::now().time_since_epoch();
+	auto now = std::chrono::system_clock::now();
+	auto since_epoch = now.time_since_epoch();
 	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch).count();
-	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-	std::time_t failure_time = std::chrono::system_clock::to_time_t(now - std::chrono::milliseconds(millis - last_creation_time));
+	failure_time = std::chrono::system_clock::to_time_t(now - std::chrono::milliseconds(millis - last_creation_time));
 	return failure_time;
 }
 
