@@ -5,7 +5,7 @@ int main(int argc, char **argv)
 	// required for argument parsing
 	int fflag = 0;
 	int c;
-	const char * def_filename = "device-file";
+	const char * def_filename = "bin/device-file";
 	char * filename;
 	extern char *optarg;
 	extern int optind;
