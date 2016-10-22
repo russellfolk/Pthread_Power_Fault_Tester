@@ -1,5 +1,16 @@
 #include "checker.h"
 
+/**
+ * device-file record checker
+ *
+ * This is a device-file checker that goes through and reads all the records written to the device-file and validates
+ * them. Ideally, all records will be complete and valid, but as this is used to test for the effect of power loss, it
+ * is expected to see partial writes and other failures.
+ *
+ * @param  argc the number of flags and arguments provided
+ * @param  argv the flags and arguments provided
+ * @return      result code for the program running
+ */
 int main(int argc, char **argv)
 {
 	// required for argument parsing
@@ -12,6 +23,7 @@ int main(int argc, char **argv)
 	std::string usage = "To run: ./bin/checker -f <device file> -d (to enable debug)\n"
 	                    "If no arguments are supplied: device file = bin/device-file, debug = off";
 
+	// default file name
 	const char * def_filename = "bin/device-file";
 
 	while ((c = getopt(argc, argv, "f:d?")) != -1)
@@ -43,24 +55,33 @@ int main(int argc, char **argv)
 	if (fflag)
 		filename = strdup(def_filename);
 
+	// open the file and set the descriptor
 	int fd = open_file(filename);
+
+	// figure out how many records can exist in the device-file
 	int file_size = (int) get_file_size(fd);
 	int num_records = file_size / RECORD_SIZE;
 
+	// parse and check all records in the device-file
 	check_file(fd, num_records);
+
+	// if not in debug mode, print out statistics
 	if (!dflag)
 		print_summary();
 
+	// clean up and exit
 	close(fd);
-
 	return 0;
 }
 
 void check_file(int fd, int num_records)
 {
+	// process all existing records in the device-file
 	for (long r_a = 0; r_a < num_records; r_a++)
 	{
+		// get the current record
 		long * record = get_record(fd, r_a);
+		// parse the record
 		parse_record(record, r_a);
 	}
 }
@@ -69,6 +90,7 @@ long * get_record(int fd, long record_address)
 {
 	long * record = (long *) malloc(RECORD_SIZE);
 
+	// read record at a given address
 	pread(fd, record, RECORD_SIZE, (record_address * RECORD_SIZE));
 
 	return record;
@@ -76,16 +98,19 @@ long * get_record(int fd, long record_address)
 
 void parse_record(long * record, long record_address)
 {
+	// if the record is not blank, print what has been written to it
 	if (!is_record_blank(record))
 	{
+		// do not print if wanting only debug information
 		if (!dflag)
 			print_record(record);
 	}
 	else
 		return; // no need to go further because it's completely blank
 
+	// check for the thread that wrote the record
 	long thread_id = record[IND_THREAD_ID];
-	// record does not exists
+	// initialize stats for the thread if it is newly discovered
 	if (stats.find(thread_id) == stats.end())
 	{
 		thread_statistics these_stats = {
@@ -98,19 +123,26 @@ void parse_record(long * record, long record_address)
 			true, // no true last record
 		};
 		stats.insert(std::make_pair(thread_id, these_stats));
+		// track total number of threads existing
 		total_threads++;
 	}
 
+	// compare the checksum of the record read with the head and tail checksums
+	// that are contained within the record
 	bool complete_record = checksum_record(record);
 
 	stats[thread_id].num_records++;
+
+	// check if it's the latest record
 	if (record[IND_TIMESTAMP] > stats[thread_id].record_write_time)
 	{
 		stats[thread_id].last_success = complete_record;
 		stats[thread_id].record_write_time = record[IND_TIMESTAMP];
 	}
+
 	if (!complete_record)
 	{
+		// debug output
 		if (dflag)
 		{
 			std::cout
@@ -122,15 +154,21 @@ void parse_record(long * record, long record_address)
 			      << "Address: " << record[IND_RECORD_ADDRESS] << std::endl
 			      << "Timestamp: " << record[IND_TIMESTAMP] << std::endl;
 		}
+		// not a complete record, increment partial write records, calculate the
+		// percentage successfully written
 		stats[thread_id].num_partial++;
 		stats[thread_id].percentage_written +=
 		                 percent_written(record, record_address);
 	}
 	else
 	{
+		// complete record, increment complete record counter and add 100% as
+		// percentage successfully written
 		stats[thread_id].num_complete++;
 		stats[thread_id].percentage_written += 1.0;
 	}
+
+	// check for a missed write, this should never happen, but just in case...
 	if (!address_valid(record, record_address))
 		stats[thread_id].num_missed_write++;
 }
@@ -138,20 +176,31 @@ void parse_record(long * record, long record_address)
 double percent_written(long * record, long record_address)
 {
 	double percent = 0.0;
+
+	// figure out what the checksum is and check against the head and tail checksums
 	long checksum = Fletcher64(record);
 	if (record[IND_HEAD_CHECKSUM] == checksum)
 		percent += 1;
 	if (record[IND_TAIL_CHECKSUM] == checksum)
 		percent += 1;
+
+	// check if this is a valid thread id
 	if (thread_id_valid(record))
 		percent += 1;
+
+	// check if this is a valid record id
 	if (record_num_valid(record))
 		percent += 1;
+
+	// check if this is a valid address
 	if (address_valid(record, record_address))
 		percent += 1;
+
+	// check if this is a valid time stamp
 	if (timestamp_valid(record))
 		percent += 1;
 
+	// recreate and test the "random data" that is included in a record
 	for (int i = IND_FIRST_RANDOM_RECORD; i < IND_TAIL_CHECKSUM - 1; i++)
 	{
 		long random_fill = record[i-1] + record[0] * record[1] * i + record[2];
@@ -159,6 +208,7 @@ double percent_written(long * record, long record_address)
 			percent += 1;
 	}
 
+	// normalize by the number of pieces to obtain a value of [0,1]
 	percent /= NUM_PIECES;
 	return percent;
 }
@@ -178,6 +228,8 @@ bool address_valid(long * record, long record_address)
 {
 	long assumed_r_a = record[IND_RECORD_ADDRESS];
 	long actual_r_a = record_address;
+
+	// debug output
 	if (dflag)
 	{
 		std::cout << "assumed_r_a " << assumed_r_a << " actual_r_a "
@@ -211,15 +263,22 @@ std::time_t estimated_power_loss(void)
 {
 	std::time_t failure_time;
 	long last_creation_time = 0;
+	// find the greatest time stamp (occurred at the latest time)
 	for (stats_it = stats.begin(); stats_it != stats.end(); stats_it++)
 	{
 		thread_statistics these_stats = stats_it->second;
 		if (these_stats.record_write_time > last_creation_time)
 			last_creation_time = these_stats.record_write_time;
 	}
+
+	// get the current time
 	auto now = std::chrono::system_clock::now();
 	auto since_epoch = now.time_since_epoch();
+
+	// convert to milliseconds since the UNIX epoch
 	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch).count();
+
+	// calculate time of failure as subtracting the number of milliseconds between now and last creation time
 	failure_time = std::chrono::system_clock::to_time_t(now - std::chrono::milliseconds(millis - last_creation_time));
 	return failure_time;
 }
