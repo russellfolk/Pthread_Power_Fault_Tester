@@ -20,13 +20,16 @@ int main(int argc, char **argv)
 	char * filename;
 	extern char *optarg;
 	extern int optind;
-	std::string usage = "To run: ./bin/checker -f <device file> -d (to enable debug)\n"
+	std::string usage = "To run: ./bin/checker -f <device file> -d (to enable debug) -o (to enable output to file) "
+	                    "-s <statistics file> -r <records written file>\n"
 	                    "If no arguments are supplied: device file = bin/device-file, debug = off";
 
-	// default file name
-	const char * def_filename = "bin/device-file";
+	// default file names
+	const char * def_devicefile = "bin/device-file";
+	const char * def_records    = "records-written.txt";
+	const char * def_statistics = "record-statistics.txt";
 
-	while ((c = getopt(argc, argv, "f:d?")) != -1)
+	while ((c = getopt(argc, argv, "f:s:r:od?")) != -1)
 	{
 		switch (c)
 		{
@@ -36,6 +39,17 @@ int main(int argc, char **argv)
 				break;
 			case 'd':
 				dflag = true;
+				break;
+			case 'o':
+				oflag = true;
+				break;
+			case 's':
+				oflag = true;
+				stats_filename = optarg;
+				break;
+			case 'r':
+				oflag = true;
+				record_filename = optarg;
 				break;
 			case '?':
 				std::cout << usage << std::endl;
@@ -55,6 +69,18 @@ int main(int argc, char **argv)
 	if (!fflag)
 		filename = strdup(def_devicefile);
 
+	// if outputting to files make sure they are valid...
+	if (oflag)
+	{
+		if (!stats_filename)
+			stats_filename = strdup(def_statistics);
+		if (!record_filename)
+			record_filename = strdup(def_records);
+		record_file.open(record_filename);
+		record_file << "Records written to device-file" << std::endl << std::endl;
+		stats_file.open(stats_filename);
+	}
+
 	// open the file and set the descriptor
 	int fd = open_file(filename);
 
@@ -70,6 +96,11 @@ int main(int argc, char **argv)
 		print_summary();
 
 	// clean up and exit
+	if (oflag)
+	{
+		record_file.close();
+		stats_file.close();
+	}
 	close(fd);
 	return 0;
 }
@@ -293,6 +324,9 @@ void print_record(long * record)
 
 	std::cout << thread_id << "\t" << record_num << "\t" << address << "\t"
 	          << timestamp << "\t" << checksum << std::endl;
+	if (oflag)
+		record_file << thread_id << "\t" << record_num << "\t" << address << "\t"
+		            << timestamp << "\t" << checksum << std::endl;
 }
 
 void print_summary(void)
@@ -306,6 +340,18 @@ void print_summary(void)
 	          << "Successful Writes" << "\t" << "Partial Writes" << "\t"
 	          << "% Written" << "\t" << "Missed Writes" << "\t"
 	          << "Last record intact" << std::endl;
+	if (oflag)
+	{
+		stats_file << "Summary of information about records written to device-file" << std::endl << std::endl;
+		stats_file << "Estimated time of powerloss" << std::endl
+		           << std::put_time(std::localtime(&failure_time), "%F %T") << std::endl;
+		stats_file << std::endl << "Statistics Summary -- " << total_threads
+		           << " total threads\n" << std::endl;
+		stats_file << "Thread ID" << "\t" << "Number of Records" << "\t"
+		           << "Successful Writes" << "\t" << "Partial Writes" << "\t"
+		           << "% Written" << "\t" << "Missed Writes" << "\t"
+		           << "Last record intact" << std::endl;
+	}
 	for (stats_it = stats.begin(); stats_it != stats.end(); stats_it++)
 	{
 		long thread_id = stats_it->first;
@@ -322,5 +368,18 @@ void print_summary(void)
 			std::cout << std::setw(18) << "Yes" << std::endl;
 		else
 			std::cout << std::setw(18) << "No" << std::endl;
+		if (oflag)
+		{
+			stats_file << std::setw(9) << thread_id << "\t" << std::setw(17)
+			           << these_stats.num_records << "\t"
+			           << std::setw(17) << these_stats.num_complete << "\t"
+			           << std::setw(14) << these_stats.num_partial << "\t"
+			           << std::setw(9) << percentage_written << "\t"
+			           << std::setw(13) << these_stats.num_missed_write << "\t";
+			if (these_stats.last_success)
+				stats_file << std::setw(18) << "Yes" << std::endl;
+			else
+				stats_file << std::setw(18) << "No" << std::endl;
+		}
 	}
 }

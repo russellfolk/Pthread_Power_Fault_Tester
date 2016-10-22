@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include <map>
 #include <iomanip>
@@ -28,6 +29,17 @@ int total_threads = 0;
 
 // flag that specifies whether or not to display debug information
 bool dflag = false;
+
+// flag that specifies whether or not to output to files instead of screen
+bool oflag = false;
+
+// output filenames
+char * record_filename;
+char * stats_filename;
+
+// file handlers
+std::ofstream record_file;
+std::ofstream stats_file;
 
 /**
   * Check device-file
