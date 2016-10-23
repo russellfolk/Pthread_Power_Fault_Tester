@@ -361,6 +361,7 @@ void print_summary(void)
 		thread_statistics these_stats = stats_it->second;
 		double percentage_written = these_stats.percentage_written;
 		percentage_written /= these_stats.num_records;
+		percentage_written *= 100.0;
 		std::cout << std::setw(9) << thread_id << "\t" << std::setw(17)
 		          << these_stats.num_records << "\t"
 		          << std::setw(17) << these_stats.num_complete << "\t"
