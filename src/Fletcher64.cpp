@@ -5,8 +5,8 @@ uint64_t Fletcher64 (long * record)
 	uint64_t sum1 = 0;
 	uint64_t sum2 = 0;
 
-	// mod_value is the max value of 2^32 so that I avoid 0 checksums
-	uint64_t mod_value = 4294967296;
+	// mod_value is the max value of 2^32-1 so that I avoid 0 checksums
+	uint64_t mod_value = 4294967295;
 
 	for(int i = IND_THREAD_ID; i < IND_TAIL_CHECKSUM; i++)
 	{
